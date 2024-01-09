@@ -1,10 +1,117 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import express from "express";
+import mongoose from 'mongoose';
+// import path from "path"
 import { readPosts, readUser, insertPost, insertUser, likeFun,  shareFun, deleteFun } from './operation.js';
 import hbs from 'hbs';
 import bodyParser from "body-parser";
 import pkg from 'jsonwebtoken';
 
 import cookieParser from "cookie-parser";
+
+
+mongoose.connect("mongodb://127.0.0.1:27017/cinema", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+
+
+
+
+// ... (previous imports)
+
+const screen1Model = mongoose.model('screen1', {
+    seatno: { type: Number },
+    status: { type: String }
+});
+
+const screen2Model = mongoose.model('screen2', {
+    seatno: { type: Number },
+    status: { type: String }
+});
+
+const screen3Model = mongoose.model('screen3', {
+    seatno: { type: Number },
+    status: { type: String }
+});
+
+const moviesModel = mongoose.model('movies', {
+    name: { type: String },
+    rate: { type: Number },
+    screen: { type: String }
+});
+
+// ... (rest of your code)
+
+
+var screen1Res
+
+screen1Model.find()
+.then(function(output){
+    screen1Res = output
+    console.log(screen1Res)
+    
+})
+
+
+.catch(function (err){
+    console.log(err)
+
+})
+
+
+
+var screen2Res
+
+screen2Model.find()
+.then(function(output){
+    screen2Res = output
+
+})
+
+
+.catch(function (err){
+    console.log(err)
+
+})
+
+
+var screen3Res
+
+screen3Model.find()
+.then(function(output){
+    screen3Res = output
+
+})
+
+
+.catch(function (err){
+    console.log(err)
+
+})
+
+
+
+var moviesRes
+
+moviesModel.find()
+.then(function(output){
+    moviesRes = output
+    // console.log(moviesRes)
+
+})
+
+
+.catch(function (err){
+    console.log(err)
+
+})
+
 
 
 const { sign, verify } = pkg;
@@ -17,6 +124,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname,"public")))
 
 app.get('/', (req, res) => {
     res.render("login");
@@ -42,6 +150,14 @@ app.post('/login', async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+app.get('/cinema', (req, res) =>{
+    res.render("cinema",{
+        movies:moviesRes,
+        screen1:screen1Res,
+        screen2:screen2Res,
+        screen3:screen3Res
+    });
+})
 
 app.get('/posts', verifyLogin, async(req, res) => {
     const output = await readPosts()
